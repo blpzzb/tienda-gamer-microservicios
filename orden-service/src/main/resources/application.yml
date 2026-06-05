@@ -1,0 +1,36 @@
+# 1. Identificación
+spring:
+  application:
+    name: orden-service
+
+  # 2. Conexión a Base de Datos (Laragon)
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_ordenes?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 3. JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+
+  # 4. Flyway
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8082
+
+# 5. URLs de microservicios para WebClient
+services:
+  usuario:
+    url: http://localhost:8081
+  producto:
+    url: http://localhost:8080
+  inventario:
+    url: http://localhost:8083

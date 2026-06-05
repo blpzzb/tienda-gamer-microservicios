@@ -1,0 +1,27 @@
+# 1. Identificación
+spring:
+  application:
+    name: usuario-service
+
+  # 2. Conexión a Base de Datos (Laragon)
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_usuarios?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 3. JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+
+  # 4. Flyway
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8081
