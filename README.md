@@ -1,422 +1,649 @@
-# Tienda Gamer - Arquitectura de Microservicios
+# Proyecto FullStack Prueba 3 - Tienda Gamer
 
 ## Descripción del proyecto
 
-Este proyecto corresponde a una aplicación de **Tienda Gamer** desarrollada con arquitectura de microservicios utilizando **Spring Boot**.
+Este proyecto corresponde a una arquitectura de microservicios desarrollada con **Spring Boot**, orientada a la gestión de una tienda gamer.
 
-El sistema permite gestionar usuarios, productos, órdenes, inventario y pagos, separando cada responsabilidad en un microservicio independiente.
+El sistema permite administrar usuarios, productos, inventario, órdenes y pagos, utilizando una arquitectura distribuida donde cada funcionalidad principal se encuentra separada en un microservicio independiente.
 
-Además, el proyecto incorpora comunicación REST entre microservicios mediante **WebClient**, documentación con **Swagger/OpenAPI**, pruebas unitarias con **JUnit y Mockito**, configuración mediante archivos **YAML** y un **API Gateway** para centralizar las rutas del sistema.
+La comunicación entre servicios se realiza mediante peticiones REST y el acceso centralizado se gestiona por medio de un **API Gateway**.
 
 ---
 
-## Integrantes del equipo
+## Arquitectura del sistema
 
-* Bill Lopez
-* Javier Castro
-* Dante Valle
-* Camilo Nelson
+El proyecto está compuesto por los siguientes servicios:
+
+| Servicio             | Descripción                                                          | Puerto |
+| -------------------- | -------------------------------------------------------------------- | -----: |
+| api-gateway          | Servicio encargado de centralizar las rutas hacia los microservicios |   8090 |
+| usuario-service      | Microservicio encargado de la gestión de usuarios                    |   8081 |
+| tienda-gamer-service | Microservicio encargado de la gestión de productos                   |   8080 |
+| inventario-service   | Microservicio encargado de la gestión de inventario                  |   8083 |
+| orden-service        | Microservicio encargado de la gestión de órdenes                     |   8082 |
+| pago-service         | Microservicio encargado de la gestión de pagos                       |   8084 |
+| mysql-fullstack      | Base de datos MySQL utilizada por los microservicios                 |   3307 |
+
+---
+
+## Tecnologías utilizadas
+
+* Java 21
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* MySQL
+* Flyway
+* Maven
+* Docker
+* Docker Compose
+* API Gateway
+* WebClient
+* Swagger / OpenAPI
+* JUnit
+* Mockito
+
+---
+
+## Estructura general del proyecto
+
+```text
+FullStack Prueba 3
+├── api-gateway
+├── usuario-service
+├── tienda-gamer-service
+├── inventario-service
+├── orden-service
+├── pago-service
+├── docker-compose.yml
+├── README.md
+└── pom.xml
+```
+
+Cada microservicio mantiene una estructura basada en el patrón:
+
+```text
+Controller - Service - Repository - Model
+```
+
+Esta separación permite organizar el código por responsabilidades, manteniendo una arquitectura más limpia y fácil de mantener.
 
 ---
 
 ## Microservicios implementados
 
-| Microservicio        | Puerto | Descripción                               |
-| -------------------- | -----: | ----------------------------------------- |
-| usuario-service      |   8081 | Gestiona los usuarios del sistema         |
-| tienda-gamer-service |   8080 | Gestiona los productos gamer              |
-| orden-service        |   8082 | Gestiona las órdenes de compra            |
-| inventario-service   |   8083 | Gestiona el stock e inventario            |
-| pago-service         |   8084 | Gestiona los pagos asociados a órdenes    |
-| api-gateway          |   8090 | Centraliza el acceso a los microservicios |
+### 1. api-gateway
+
+Servicio encargado de centralizar las peticiones hacia los microservicios.
+
+Puerto:
+
+```text
+8090
+```
+
+Rutas configuradas:
+
+```text
+/usuarios/**
+/productos/**
+/inventario/**
+/ordenes/**
+/pagos/**
+```
 
 ---
 
-## Arquitectura utilizada
+### 2. usuario-service
 
-El proyecto utiliza el patrón **CSR**, separando las responsabilidades en distintas capas:
+Servicio encargado de la gestión de usuarios.
 
-* **Controller:** recibe las solicitudes HTTP.
-* **Service:** contiene la lógica de negocio, validaciones y comunicación entre servicios.
-* **Repository:** gestiona el acceso a la base de datos.
-* **Model:** representa las entidades del sistema.
+Puerto:
 
-Cada microservicio posee su propia responsabilidad y trabaja de forma independiente.
+```text
+8081
+```
+
+Base de datos:
+
+```text
+db_usuarios
+```
+
+---
+
+### 3. tienda-gamer-service
+
+Servicio encargado de la gestión de productos de la tienda gamer.
+
+Puerto:
+
+```text
+8080
+```
+
+Base de datos:
+
+```text
+db_tienda_gamer
+```
+
+---
+
+### 4. inventario-service
+
+Servicio encargado de la gestión del inventario de productos.
+
+Puerto:
+
+```text
+8083
+```
+
+Base de datos:
+
+```text
+db_inventario
+```
+
+---
+
+### 5. orden-service
+
+Servicio encargado de la gestión de órdenes.
+
+Puerto:
+
+```text
+8082
+```
+
+Base de datos:
+
+```text
+db_ordenes
+```
+
+Este microservicio se comunica con:
+
+```text
+usuario-service
+tienda-gamer-service
+inventario-service
+```
+
+---
+
+### 6. pago-service
+
+Servicio encargado de la gestión de pagos.
+
+Puerto:
+
+```text
+8084
+```
+
+Base de datos:
+
+```text
+db_pagos
+```
+
+Este microservicio se comunica con:
+
+```text
+orden-service
+```
+
+---
+
+## Configuración de Docker
+
+Cada microservicio cuenta con un archivo:
+
+```text
+Dockerfile
+```
+
+Este archivo permite construir una imagen Docker individual para cada servicio.
+
+Además, en la carpeta principal del proyecto existe el archivo:
+
+```text
+docker-compose.yml
+```
+
+Este archivo permite levantar todos los servicios al mismo tiempo, incluyendo:
+
+```text
+api-gateway
+usuario-service
+tienda-gamer-service
+inventario-service
+orden-service
+pago-service
+mysql-fullstack
+```
+
+---
+
+## Ejecución del proyecto con Docker
+
+### Requisitos previos
+
+Antes de ejecutar el proyecto se debe tener instalado:
+
+```text
+Docker Desktop
+Docker Compose
+```
+
+También se recomienda tener instalado:
+
+```text
+Java 21
+Maven
+```
+
+---
+
+### Levantar todos los servicios
+
+Desde la carpeta principal del proyecto, donde se encuentra el archivo `docker-compose.yml`, ejecutar:
+
+```bash
+docker compose up --build -d
+```
+
+Este comando construye las imágenes de los microservicios y levanta todos los contenedores en segundo plano.
+
+---
+
+### Verificar contenedores activos
+
+Para comprobar que los servicios se están ejecutando correctamente:
+
+```bash
+docker compose ps
+```
+
+Los servicios deben aparecer en estado:
+
+```text
+Up
+```
+
+El contenedor de MySQL debe aparecer como:
+
+```text
+healthy
+```
+
+---
+
+### Detener los servicios
+
+Para detener los contenedores:
+
+```bash
+docker compose down
+```
+
+---
+
+### Detener y eliminar datos persistentes
+
+Si se desea detener los servicios y eliminar el volumen de datos de MySQL:
+
+```bash
+docker compose down -v
+```
+
+---
+
+## Puertos utilizados
+
+| Servicio             | Puerto local | Puerto contenedor |
+| -------------------- | -----------: | ----------------: |
+| api-gateway          |         8090 |              8090 |
+| usuario-service      |         8081 |              8081 |
+| tienda-gamer-service |         8080 |              8080 |
+| inventario-service   |         8083 |              8083 |
+| orden-service        |         8082 |              8082 |
+| pago-service         |         8084 |              8084 |
+| mysql-fullstack      |         3307 |              3306 |
+
+MySQL se expone en el puerto local:
+
+```text
+3307
+```
+
+Esto evita conflictos con instalaciones locales como Laragon, que normalmente utilizan el puerto:
+
+```text
+3306
+```
+
+---
+
+## Verificación de funcionamiento
+
+### Verificar API Gateway
+
+Abrir en el navegador:
+
+```text
+http://localhost:8090/actuator/health
+```
+
+Respuesta esperada:
+
+```json
+{
+  "status": "UP"
+}
+```
+
+También puede mostrarse una respuesta similar a:
+
+```json
+{
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "status": "UP"
+}
+```
+
+Esto indica que el API Gateway está funcionando correctamente.
+
+---
+
+### Verificar microservicios directamente
+
+Usuario Service:
+
+```text
+http://localhost:8081/actuator/health
+```
+
+Tienda Gamer Service:
+
+```text
+http://localhost:8080/actuator/health
+```
+
+Inventario Service:
+
+```text
+http://localhost:8083/actuator/health
+```
+
+Orden Service:
+
+```text
+http://localhost:8082/actuator/health
+```
+
+Pago Service:
+
+```text
+http://localhost:8084/actuator/health
+```
+
+La respuesta esperada para cada servicio es:
+
+```json
+{
+  "status": "UP"
+}
+```
+
+---
+
+## Rutas principales mediante API Gateway
+
+El API Gateway utiliza el puerto:
+
+```text
+8090
+```
+
+Las rutas principales son:
+
+```text
+http://localhost:8090/usuarios
+http://localhost:8090/productos
+http://localhost:8090/inventario
+http://localhost:8090/ordenes
+http://localhost:8090/pagos
+```
+
+Estas rutas redirigen hacia los microservicios correspondientes.
 
 ---
 
 ## Comunicación entre microservicios
 
-Se implementó **WebClient** para permitir la comunicación REST entre microservicios.
+El sistema utiliza comunicación REST entre microservicios.
 
-### Comunicación de orden-service
+El microservicio `orden-service` consume información desde:
 
-El microservicio `orden-service` consulta a otros servicios antes de crear una orden:
+```text
+usuario-service
+tienda-gamer-service
+inventario-service
+```
 
-* Consulta a `usuario-service` para validar que el usuario exista.
-* Consulta a `tienda-gamer-service` para validar que el producto exista.
-* Consulta a `inventario-service` para validar que exista stock disponible.
+El microservicio `pago-service` consume información desde:
 
-### Comunicación de pago-service
+```text
+orden-service
+```
 
-El microservicio `pago-service` consulta a:
+Para permitir que la comunicación funcione tanto de manera local como dentro de Docker, se utilizan variables de entorno en los archivos `application.yml`.
 
-* `orden-service` para validar que la orden exista antes de registrar un pago.
+Ejemplo:
 
----
+```yaml
+services:
+  orden:
+    url: ${ORDEN_SERVICE_URL:http://localhost:8082}
+```
 
-## API Gateway
+Cuando el sistema se ejecuta localmente, se utiliza `localhost`.
 
-El proyecto cuenta con un **API Gateway** ejecutándose en el puerto `8090`.
+Cuando el sistema se ejecuta con Docker, Docker Compose reemplaza la URL por el nombre del contenedor, por ejemplo:
 
-Este Gateway permite centralizar el acceso a los microservicios desde una única entrada.
-
-| Ruta Gateway                     | Microservicio destino |
-| -------------------------------- | --------------------- |
-| http://localhost:8090/usuarios   | usuario-service       |
-| http://localhost:8090/productos  | tienda-gamer-service  |
-| http://localhost:8090/ordenes    | orden-service         |
-| http://localhost:8090/inventario | inventario-service    |
-| http://localhost:8090/pagos      | pago-service          |
-
-También se puede verificar el estado del Gateway con:
-
-```http
-GET http://localhost:8090/actuator/health
+```text
+http://orden-service:8082
 ```
 
 ---
 
-## Swagger / OpenAPI
+## Bases de datos utilizadas
 
-Cada microservicio cuenta con documentación Swagger para visualizar y probar sus endpoints desde el navegador.
-
-| Microservicio        | URL Swagger                           |
-| -------------------- | ------------------------------------- |
-| usuario-service      | http://localhost:8081/swagger-ui.html |
-| tienda-gamer-service | http://localhost:8080/swagger-ui.html |
-| orden-service        | http://localhost:8082/swagger-ui.html |
-| inventario-service   | http://localhost:8083/swagger-ui.html |
-| pago-service         | http://localhost:8084/swagger-ui.html |
-
----
-
-## Bases de datos
-
-El proyecto utiliza **MySQL** mediante **Laragon**.
-
-Cada microservicio trabaja con su propia base de datos.
+Cada microservicio utiliza su propia base de datos, manteniendo separación de responsabilidades.
 
 | Microservicio        | Base de datos   |
 | -------------------- | --------------- |
 | usuario-service      | db_usuarios     |
 | tienda-gamer-service | db_tienda_gamer |
-| orden-service        | db_ordenes      |
 | inventario-service   | db_inventario   |
+| orden-service        | db_ordenes      |
 | pago-service         | db_pagos        |
+
+Todas las bases de datos se ejecutan sobre el contenedor:
+
+```text
+mysql-fullstack
+```
 
 ---
 
 ## Configuración YAML
 
-Todos los microservicios utilizan archivos `application.yml` para configurar:
+Los microservicios utilizan archivos:
 
-* Nombre del servicio.
-* Puerto del microservicio.
-* Conexión a base de datos.
-* Configuración JPA / Hibernate.
-* Configuración Flyway.
-* URLs de comunicación entre microservicios.
-* Rutas del API Gateway.
+```text
+application.yml
+```
+
+Estos archivos permiten configurar:
+
+```text
+nombre del servicio
+puerto de ejecución
+conexión a base de datos
+configuración JPA
+configuración Flyway
+rutas de comunicación entre microservicios
+actuator health
+```
+
+El uso de variables de entorno permite que el proyecto funcione tanto en ejecución local como en ejecución con Docker.
 
 ---
 
 ## Flyway
 
-Se utiliza **Flyway** para gestionar las migraciones de base de datos.
+El proyecto utiliza Flyway para ejecutar migraciones de base de datos.
 
-Cada microservicio contiene sus scripts SQL dentro de:
+Las migraciones se encuentran en:
 
 ```text
 src/main/resources/db/migration
 ```
 
-Esto permite crear y versionar las tablas de cada base de datos de forma ordenada.
+Esto permite versionar y controlar la creación de tablas y datos iniciales dentro de cada microservicio.
 
 ---
 
-## Logs
+## Swagger / OpenAPI
 
-Se implementaron logs en los servicios principales utilizando **SLF4J**.
+El proyecto considera documentación técnica mediante Swagger/OpenAPI para facilitar la revisión y prueba de endpoints.
 
-Los logs permiten visualizar acciones importantes del sistema, por ejemplo:
+Las rutas de Swagger normalmente se pueden revisar en cada microservicio usando:
 
-* Creación de productos.
-* Creación de órdenes.
-* Registro de pagos.
-* Consulta entre microservicios.
-* Validaciones de datos.
-* Errores cuando un registro no existe.
-* Errores cuando un microservicio no responde.
+```text
+http://localhost:8081/swagger-ui/index.html
+http://localhost:8080/swagger-ui/index.html
+http://localhost:8083/swagger-ui/index.html
+http://localhost:8082/swagger-ui/index.html
+http://localhost:8084/swagger-ui/index.html
+```
 
----
-
-## Validaciones implementadas
-
-El proyecto incorpora validaciones de negocio en los servicios.
-
-### Producto
-
-* El nombre del producto es obligatorio.
-* El precio debe ser mayor a 0.
-* El stock no puede ser negativo.
-* Se valida existencia antes de eliminar.
-
-### Inventario
-
-* El productoId es obligatorio.
-* El stock actual no puede ser negativo.
-* La ubicación de bodega es obligatoria.
-* Se valida existencia antes de eliminar.
-
-### Orden
-
-* El usuarioId es obligatorio.
-* El productoId es obligatorio.
-* La cantidad debe ser mayor a 0.
-* Se valida existencia de usuario, producto y stock mediante WebClient.
-* Se valida existencia antes de eliminar.
-
-### Pago
-
-* El ordenId es obligatorio.
-* El monto debe ser mayor a 0.
-* Si el estado viene vacío, se asigna automáticamente como `PAGADO`.
-* Se valida existencia de la orden mediante WebClient.
-* Se valida existencia antes de eliminar.
+Estas rutas permiten visualizar los endpoints disponibles, parámetros, respuestas y modelos utilizados por cada servicio.
 
 ---
 
 ## Pruebas unitarias
 
-Se implementaron pruebas unitarias con **JUnit** y **Mockito** para validar la lógica de negocio de los servicios.
+El proyecto considera pruebas unitarias utilizando:
 
-Pruebas creadas:
+```text
+JUnit
+Mockito
+```
 
-* UsuarioServiceTest
-* ProductoServiceTest
-* InventarioServiceTest
-* OrdenServiceTest
-* PagoServiceTest
+Las pruebas se encuentran en:
 
-Las pruebas validan:
+```text
+src/test/java
+```
 
-* Listado de registros.
-* Búsqueda por ID.
-* Guardado correcto.
-* Eliminación.
-* Validaciones de negocio.
-* Errores cuando no existen registros.
-* Comunicación simulada con WebClient mediante Mockito.
+Estas pruebas permiten validar la lógica de negocio de los servicios y comprobar que el comportamiento esperado se cumple correctamente.
 
 ---
 
-## Endpoints principales
+## Comandos útiles
 
-### Usuarios
+Construir y levantar todos los servicios:
 
-```http
-GET    /usuarios
-GET    /usuarios/{id}
-POST   /usuarios
-DELETE /usuarios/{id}
+```bash
+docker compose up --build -d
 ```
 
-### Productos
+Ver estado de los contenedores:
 
-```http
-GET    /productos
-GET    /productos/{id}
-POST   /productos
-DELETE /productos/{id}
+```bash
+docker compose ps
 ```
 
-### Órdenes
+Ver logs de un servicio específico:
 
-```http
-GET    /ordenes
-GET    /ordenes/{id}
-POST   /ordenes
-DELETE /ordenes/{id}
+```bash
+docker logs api-gateway --tail=100
 ```
 
-### Inventario
+Ejemplo para revisar logs de `orden-service`:
 
-```http
-GET    /inventario
-GET    /inventario/{id}
-GET    /inventario/producto/{productoId}
-POST   /inventario
-DELETE /inventario/{id}
+```bash
+docker logs orden-service --tail=100
 ```
 
-### Pagos
+Detener servicios:
 
-```http
-GET    /pagos
-GET    /pagos/{id}
-POST   /pagos
-DELETE /pagos/{id}
+```bash
+docker compose down
+```
+
+Detener servicios y eliminar datos de MySQL:
+
+```bash
+docker compose down -v
 ```
 
 ---
 
-## Ejecución del proyecto
+## Evidencias de ejecución
 
-Antes de iniciar los microservicios, se debe iniciar **Laragon/MySQL**.
+Para la defensa técnica se puede mostrar:
 
-Orden recomendado de ejecución:
-
-1. usuario-service
-2. tienda-gamer-service
-3. inventario-service
-4. orden-service
-5. pago-service
-6. api-gateway
-
----
-
-## Pruebas mediante API Gateway
-
-Con todos los servicios activos, se pueden probar las rutas desde el Gateway:
-
-```http
-GET http://localhost:8090/usuarios
-GET http://localhost:8090/productos
-GET http://localhost:8090/ordenes
-GET http://localhost:8090/inventario
-GET http://localhost:8090/pagos
+```text
+Docker Desktop con los contenedores activos
+PowerShell ejecutando docker compose ps
+API Gateway funcionando en http://localhost:8090/actuator/health
+Microservicios respondiendo con status UP
+MySQL en estado healthy
+Endpoints funcionando desde el API Gateway
 ```
 
 ---
 
-## Ejemplo de creación de usuario
+## Explicación técnica resumida
 
-```http
-POST http://localhost:8090/usuarios
-```
+Este proyecto aplica una arquitectura de microservicios donde cada servicio tiene una responsabilidad específica.
+El API Gateway centraliza las solicitudes y redirige hacia el microservicio correspondiente.
 
-```json
-{
-  "nombre": "Javier",
-  "correo": "javier@gmail.com",
-  "rut": "12345678-9"
-}
-```
+Cada microservicio cuenta con su propia configuración, puerto, base de datos y estructura interna basada en capas.
+La comunicación entre servicios se realiza mediante REST, permitiendo que los servicios trabajen de forma independiente pero conectada.
+
+Docker permite ejecutar todo el ecosistema de manera ordenada, levantando la base de datos, los microservicios y el API Gateway con un solo comando.
 
 ---
 
-## Ejemplo de creación de producto
+## Autores
 
-```http
-POST http://localhost:8090/productos
+Proyecto desarrollado para la asignatura:
+
+```text
+Desarrollo FullStack 1
 ```
 
-```json
-{
-  "nombre": "Mouse Gamer",
-  "categoria": "Perifericos",
-  "precio": 25000,
-  "stock": 10
-}
+Evaluación:
+
+```text
+Evaluación Parcial 3
 ```
 
----
+Integrantes:
 
-## Ejemplo de creación de inventario
-
-```http
-POST http://localhost:8090/inventario
-```
-
-```json
-{
-  "productoId": 1,
-  "stockActual": 10,
-  "ubicacionBodega": "Bodega Central"
-}
-```
-
----
-
-## Ejemplo de creación de orden
-
-```http
-POST http://localhost:8090/ordenes
-```
-
-```json
-{
-  "usuarioId": 1,
-  "productoId": 1,
-  "cantidad": 2
-}
-```
-
-Antes de crear la orden, el sistema valida mediante WebClient que:
-
-* El usuario exista.
-* El producto exista.
-* Exista stock suficiente.
-
----
-
-## Ejemplo de creación de pago
-
-```http
-POST http://localhost:8090/pagos
-```
-
-```json
-{
-  "ordenId": 1,
-  "monto": 50000,
-  "estado": "PAGADO"
-}
-```
-
-Antes de registrar el pago, el sistema valida mediante WebClient que la orden exista.
-
----
-
-## Herramientas utilizadas
-
-* Java 21
-* Spring Boot
-* Spring Data JPA
-* Spring Cloud Gateway
-* WebClient
-* MySQL
-* Laragon
-* Flyway
-* Swagger / OpenAPI
-* JUnit
-* Mockito
-* Maven
-* IntelliJ IDEA
-* Postman
-* GitHub
-* Trello
-
----
-
-## Resumen técnico
-
-El sistema está compuesto por cinco microservicios principales y un API Gateway.
-
-Cada microservicio posee su propia estructura, base de datos y configuración.
-La comunicación entre servicios se realiza mediante WebClient, permitiendo validar información entre microservicios antes de guardar datos importantes como órdenes y pagos.
-
-El API Gateway permite centralizar el consumo de las APIs desde el puerto `8090`.
-Swagger permite documentar y probar los endpoints de cada servicio.
-Las pruebas unitarias validan la lógica principal del sistema utilizando JUnit y Mockito.
+```text
+- Javier Castro Farias
+- Integrante 2
+- Integrante 3
+- Integrante 4

@@ -1,0 +1,126 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-fullstack
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: ""
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  usuario-service:
+    build: ./usuario-service
+    container_name: usuario-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/db_usuarios?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+
+  tienda-gamer-service:
+    build: ./tienda-gamer-service
+    container_name: tienda-gamer-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/db_tienda_gamer?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+
+  inventario-service:
+    build: ./inventario-service
+    container_name: inventario-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/db_inventario?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+
+  orden-service:
+    build: ./orden-service
+    container_name: orden-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      usuario-service:
+        condition: service_started
+      tienda-gamer-service:
+        condition: service_started
+      inventario-service:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/db_ordenes?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      USUARIO_SERVICE_URL: http://usuario-service:8081
+      TIENDA_SERVICE_URL: http://tienda-gamer-service:8080
+      INVENTARIO_SERVICE_URL: http://inventario-service:8083
+
+  pago-service:
+    build: ./pago-service
+    container_name: pago-service
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      orden-service:
+        condition: service_started
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/db_pagos?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      ORDEN_SERVICE_URL: http://orden-service:8082
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      usuario-service:
+        condition: service_started
+      tienda-gamer-service:
+        condition: service_started
+      inventario-service:
+        condition: service_started
+      orden-service:
+        condition: service_started
+      pago-service:
+        condition: service_started
+    ports:
+      - "8090:8090"
+    environment:
+      USUARIO_SERVICE_URL: http://usuario-service:8081
+      TIENDA_SERVICE_URL: http://tienda-gamer-service:8080
+      INVENTARIO_SERVICE_URL: http://inventario-service:8083
+      ORDEN_SERVICE_URL: http://orden-service:8082
+      PAGO_SERVICE_URL: http://pago-service:8084
+
+volumes:
+  mysql_data:
