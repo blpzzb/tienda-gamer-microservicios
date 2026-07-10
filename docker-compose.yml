@@ -1,4 +1,9 @@
 services:
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+
   mysql:
     image: mysql:8.0
     container_name: mysql-fullstack
@@ -121,6 +126,53 @@ services:
       INVENTARIO_SERVICE_URL: http://inventario-service:8083
       ORDEN_SERVICE_URL: http://orden-service:8082
       PAGO_SERVICE_URL: http://pago-service:8084
+      CATEGORIA_SERVICE_URL: http://categoria-service:8085
+      PROVEEDOR_SERVICE_URL: http://proveedor-service:8086
+      CARRITO_SERVICE_URL: http://carrito-service:8087
+      RESENA_SERVICE_URL: http://resena-service:8088
+      NOTIFICACION_SERVICE_URL: http://notificacion-service:8089
+
+  categoria-service:
+    build: ./categoria-service
+    ports: ["8085:8085"]
+    environment: &new_service_env
+      DB_URL: jdbc:mysql://mysql:3306/db_categorias?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      EUREKA_URL: http://eureka-server:8761/eureka/
+    depends_on: [mysql, eureka-server]
+
+  proveedor-service:
+    build: ./proveedor-service
+    ports: ["8086:8086"]
+    environment:
+      <<: *new_service_env
+      DB_URL: jdbc:mysql://mysql:3306/db_proveedores?createDatabaseIfNotExist=true&serverTimezone=UTC
+    depends_on: [mysql, eureka-server]
+
+  carrito-service:
+    build: ./carrito-service
+    ports: ["8087:8087"]
+    environment:
+      <<: *new_service_env
+      DB_URL: jdbc:mysql://mysql:3306/db_carritos?createDatabaseIfNotExist=true&serverTimezone=UTC
+    depends_on: [mysql, eureka-server]
+
+  resena-service:
+    build: ./resena-service
+    ports: ["8088:8088"]
+    environment:
+      <<: *new_service_env
+      DB_URL: jdbc:mysql://mysql:3306/db_resenas?createDatabaseIfNotExist=true&serverTimezone=UTC
+    depends_on: [mysql, eureka-server]
+
+  notificacion-service:
+    build: ./notificacion-service
+    ports: ["8089:8089"]
+    environment:
+      <<: *new_service_env
+      DB_URL: jdbc:mysql://mysql:3306/db_notificaciones?createDatabaseIfNotExist=true&serverTimezone=UTC
+    depends_on: [mysql, eureka-server]
 
 volumes:
   mysql_data:

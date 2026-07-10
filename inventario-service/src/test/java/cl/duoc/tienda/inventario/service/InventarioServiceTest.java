@@ -1,5 +1,6 @@
 package cl.duoc.tienda.inventario.service;
 
+import cl.duoc.tienda.inventario.dto.InventarioRequest;
 import cl.duoc.tienda.inventario.model.Inventario;
 import cl.duoc.tienda.inventario.repository.InventarioRepository;
 import org.junit.jupiter.api.Test;
@@ -158,10 +159,7 @@ public class InventarioServiceTest {
     @Test
     void guardar_conInventarioValido_deberiaGuardarInventarioCorrectamente() {
         // Given
-        Inventario inventario = new Inventario();
-        inventario.setProductoId(1L);
-        inventario.setStockActual(10);
-        inventario.setUbicacionBodega("Bodega Central");
+        InventarioRequest request = new InventarioRequest(1L, 10, "Bodega Central");
 
         Inventario inventarioGuardado = new Inventario();
         inventarioGuardado.setId(1L);
@@ -169,10 +167,10 @@ public class InventarioServiceTest {
         inventarioGuardado.setStockActual(10);
         inventarioGuardado.setUbicacionBodega("Bodega Central");
 
-        when(inventarioRepository.save(inventario)).thenReturn(inventarioGuardado);
+        when(inventarioRepository.save(any(Inventario.class))).thenReturn(inventarioGuardado);
 
         // When
-        Inventario resultado = inventarioService.guardar(inventario);
+        Inventario resultado = inventarioService.guardar(request);
 
         // Then
         assertNotNull(resultado);
@@ -181,20 +179,17 @@ public class InventarioServiceTest {
         assertEquals(10, resultado.getStockActual());
         assertEquals("Bodega Central", resultado.getUbicacionBodega());
 
-        verify(inventarioRepository, times(1)).save(inventario);
+        verify(inventarioRepository, times(1)).save(any(Inventario.class));
     }
 
     @Test
     void guardar_conProductoIdNulo_deberiaLanzarExcepcion() {
         // Given
-        Inventario inventario = new Inventario();
-        inventario.setProductoId(null);
-        inventario.setStockActual(10);
-        inventario.setUbicacionBodega("Bodega Central");
+        InventarioRequest request = new InventarioRequest(null, 10, "Bodega Central");
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            inventarioService.guardar(inventario);
+            inventarioService.guardar(request);
         });
 
         // Then
@@ -206,14 +201,11 @@ public class InventarioServiceTest {
     @Test
     void guardar_conStockNegativo_deberiaLanzarExcepcion() {
         // Given
-        Inventario inventario = new Inventario();
-        inventario.setProductoId(1L);
-        inventario.setStockActual(-1);
-        inventario.setUbicacionBodega("Bodega Central");
+        InventarioRequest request = new InventarioRequest(1L, -1, "Bodega Central");
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            inventarioService.guardar(inventario);
+            inventarioService.guardar(request);
         });
 
         // Then
@@ -225,14 +217,11 @@ public class InventarioServiceTest {
     @Test
     void guardar_conUbicacionVacia_deberiaLanzarExcepcion() {
         // Given
-        Inventario inventario = new Inventario();
-        inventario.setProductoId(1L);
-        inventario.setStockActual(10);
-        inventario.setUbicacionBodega("");
+        InventarioRequest request = new InventarioRequest(1L, 10, "");
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            inventarioService.guardar(inventario);
+            inventarioService.guardar(request);
         });
 
         // Then

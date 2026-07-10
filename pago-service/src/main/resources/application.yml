@@ -26,6 +26,11 @@ services:
   orden:
     url: ${ORDEN_SERVICE_URL:http://localhost:8082}
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
 management:
   endpoints:
     web:

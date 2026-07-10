@@ -1,6 +1,7 @@
 package cl.duoc.tienda.pago.service;
 
 import cl.duoc.tienda.pago.dto.OrdenDTO;
+import cl.duoc.tienda.pago.dto.PagoRequest;
 import cl.duoc.tienda.pago.model.Pago;
 import cl.duoc.tienda.pago.repository.PagoRepository;
 import org.slf4j.Logger;
@@ -49,24 +50,45 @@ public class PagoService {
                 });
     }
 
-    public Pago guardar(Pago pago) {
-        logger.info("Iniciando registro de pago para orden ID: {}", pago.getOrdenId());
+    public Pago guardar(PagoRequest request) {
+        logger.info("Iniciando registro de pago para orden ID: {}", request.ordenId());
 
-        validarPago(pago);
+        validarPago(request);
 
-        OrdenDTO orden = consultarOrden(pago.getOrdenId());
+        OrdenDTO orden = consultarOrden(request.ordenId());
 
         logger.info("Orden validada desde orden-service. ID: {}", orden.getId());
 
-        if (pago.getEstado() == null || pago.getEstado().trim().isEmpty()) {
-            pago.setEstado("PAGADO");
-            logger.info("Estado del pago asignado automáticamente como PAGADO");
-        }
+        Pago pago = new Pago();
+        pago.setOrdenId(request.ordenId());
+        pago.setMonto(request.monto());
+        pago.setEstado("PAGADO");
 
         Pago pagoGuardado = pagoRepository.save(pago);
 
         logger.info("Pago registrado correctamente con ID: {}", pagoGuardado.getId());
 
+        return pagoGuardado;
+    }
+
+    public Pago actualizar(Long id, PagoRequest request) {
+        logger.info("Intentando actualizar pago con ID: {}", id);
+        buscarPorId(id);
+        
+        validarPago(request);
+
+        OrdenDTO orden = consultarOrden(request.ordenId());
+
+        logger.info("Orden validada desde orden-service. ID: {}", orden.getId());
+
+        Pago pago = new Pago();
+        pago.setId(id);
+        pago.setOrdenId(request.ordenId());
+        pago.setMonto(request.monto());
+        pago.setEstado("PAGADO");
+
+        Pago pagoGuardado = pagoRepository.save(pago);
+        logger.info("Pago actualizado correctamente con ID: {}", id);
         return pagoGuardado;
     }
 
@@ -88,13 +110,13 @@ public class PagoService {
         logger.info("Pago eliminado correctamente con ID: {}", id);
     }
 
-    private void validarPago(Pago pago) {
-        if (pago.getOrdenId() == null) {
+    private void validarPago(PagoRequest request) {
+        if (request.ordenId() == null) {
             logger.warn("No se pudo registrar el pago: ordenId vacío");
             throw new IllegalArgumentException("El ordenId es obligatorio");
         }
 
-        if (pago.getMonto() == null || pago.getMonto() <= 0) {
+        if (request.monto() == null || request.monto() <= 0) {
             logger.warn("No se pudo registrar el pago: monto inválido");
             throw new IllegalArgumentException("El monto debe ser mayor a 0");
         }

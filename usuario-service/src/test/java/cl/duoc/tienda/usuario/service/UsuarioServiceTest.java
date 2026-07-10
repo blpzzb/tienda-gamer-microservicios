@@ -1,5 +1,6 @@
 package cl.duoc.tienda.usuario.service;
 
+import cl.duoc.tienda.usuario.dto.UsuarioRequest;
 import cl.duoc.tienda.usuario.model.Usuario;
 import cl.duoc.tienda.usuario.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
@@ -56,10 +57,7 @@ public class UsuarioServiceTest {
     @Test
     void guardar_deberiaGuardarUsuarioCorrectamente() {
         // Given
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Javier");
-        usuario.setCorreo("javier@gmail.com");
-        usuario.setRut("12345678-9");
+        UsuarioRequest request = new UsuarioRequest("Javier", "javier@gmail.com", "12345678-9");
 
         Usuario usuarioGuardado = new Usuario();
         usuarioGuardado.setId(1L);
@@ -67,10 +65,10 @@ public class UsuarioServiceTest {
         usuarioGuardado.setCorreo("javier@gmail.com");
         usuarioGuardado.setRut("12345678-9");
 
-        when(usuarioRepository.save(usuario)).thenReturn(usuarioGuardado);
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioGuardado);
 
         // When
-        Usuario resultado = usuarioService.guardar(usuario);
+        Usuario resultado = usuarioService.guardar(request);
 
         // Then
         assertNotNull(resultado);
@@ -79,7 +77,7 @@ public class UsuarioServiceTest {
         assertEquals("javier@gmail.com", resultado.getCorreo());
         assertEquals("12345678-9", resultado.getRut());
 
-        verify(usuarioRepository, times(1)).save(usuario);
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
     }
 
     @Test
@@ -130,12 +128,33 @@ public class UsuarioServiceTest {
         // Given
         Long id = 1L;
 
+        when(usuarioRepository.existsById(id)).thenReturn(true);
         doNothing().when(usuarioRepository).deleteById(id);
 
         // When
         usuarioService.eliminar(id);
 
         // Then
+        verify(usuarioRepository, times(1)).existsById(id);
         verify(usuarioRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void eliminar_cuandoNoExiste_deberiaLanzarExcepcion() {
+        // Given
+        Long id = 99L;
+
+        when(usuarioRepository.existsById(id)).thenReturn(false);
+
+        // When
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            usuarioService.eliminar(id);
+        });
+
+        // Then
+        assertEquals("Usuario no encontrado con ID: 99", exception.getMessage());
+
+        verify(usuarioRepository, times(1)).existsById(id);
+        verify(usuarioRepository, never()).deleteById(id);
     }
 }

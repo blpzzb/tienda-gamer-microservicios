@@ -1,6 +1,7 @@
 package cl.duoc.tienda.orden.service;
 
 import cl.duoc.tienda.orden.dto.InventarioDTO;
+import cl.duoc.tienda.orden.dto.OrdenRequest;
 import cl.duoc.tienda.orden.dto.ProductoDTO;
 import cl.duoc.tienda.orden.dto.UsuarioDTO;
 import cl.duoc.tienda.orden.model.Orden;
@@ -122,10 +123,7 @@ public class OrdenServiceTest {
         ReflectionTestUtils.setField(ordenService, "productoServiceUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(ordenService, "inventarioServiceUrl", "http://localhost:8083");
 
-        Orden orden = new Orden();
-        orden.setUsuarioId(1L);
-        orden.setProductoId(1L);
-        orden.setCantidad(2);
+        OrdenRequest request = new OrdenRequest(1L, 1L, 2);
 
         UsuarioDTO usuarioDTO = new UsuarioDTO();
         usuarioDTO.setId(1L);
@@ -158,10 +156,10 @@ public class OrdenServiceTest {
         when(responseSpec.bodyToMono(UsuarioDTO.class)).thenReturn(Mono.just(usuarioDTO));
         when(responseSpec.bodyToMono(ProductoDTO.class)).thenReturn(Mono.just(productoDTO));
         when(responseSpec.bodyToMono(InventarioDTO.class)).thenReturn(Mono.just(inventarioDTO));
-        when(ordenRepository.save(orden)).thenReturn(ordenGuardada);
+        when(ordenRepository.save(any(Orden.class))).thenReturn(ordenGuardada);
 
         // When
-        Orden resultado = ordenService.guardar(orden);
+        Orden resultado = ordenService.guardar(request);
 
         // Then
         assertNotNull(resultado);
@@ -169,22 +167,18 @@ public class OrdenServiceTest {
         assertEquals(1L, resultado.getUsuarioId());
         assertEquals(1L, resultado.getProductoId());
         assertEquals(2, resultado.getCantidad());
-        assertNotNull(orden.getFechaOrden());
 
-        verify(ordenRepository, times(1)).save(orden);
+        verify(ordenRepository, times(1)).save(any(Orden.class));
     }
 
     @Test
     void guardar_conUsuarioIdNulo_deberiaLanzarExcepcion() {
         // Given
-        Orden orden = new Orden();
-        orden.setUsuarioId(null);
-        orden.setProductoId(1L);
-        orden.setCantidad(2);
+        OrdenRequest request = new OrdenRequest(null, 1L, 2);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            ordenService.guardar(orden);
+            ordenService.guardar(request);
         });
 
         // Then
@@ -196,14 +190,11 @@ public class OrdenServiceTest {
     @Test
     void guardar_conProductoIdNulo_deberiaLanzarExcepcion() {
         // Given
-        Orden orden = new Orden();
-        orden.setUsuarioId(1L);
-        orden.setProductoId(null);
-        orden.setCantidad(2);
+        OrdenRequest request = new OrdenRequest(1L, null, 2);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            ordenService.guardar(orden);
+            ordenService.guardar(request);
         });
 
         // Then
@@ -215,14 +206,11 @@ public class OrdenServiceTest {
     @Test
     void guardar_conCantidadInvalida_deberiaLanzarExcepcion() {
         // Given
-        Orden orden = new Orden();
-        orden.setUsuarioId(1L);
-        orden.setProductoId(1L);
-        orden.setCantidad(0);
+        OrdenRequest request = new OrdenRequest(1L, 1L, 0);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            ordenService.guardar(orden);
+            ordenService.guardar(request);
         });
 
         // Then
@@ -238,10 +226,7 @@ public class OrdenServiceTest {
         ReflectionTestUtils.setField(ordenService, "productoServiceUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(ordenService, "inventarioServiceUrl", "http://localhost:8083");
 
-        Orden orden = new Orden();
-        orden.setUsuarioId(1L);
-        orden.setProductoId(1L);
-        orden.setCantidad(10);
+        OrdenRequest request = new OrdenRequest(1L, 1L, 10);
 
         UsuarioDTO usuarioDTO = new UsuarioDTO();
         usuarioDTO.setId(1L);
@@ -265,7 +250,7 @@ public class OrdenServiceTest {
 
         // When
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            ordenService.guardar(orden);
+            ordenService.guardar(request);
         });
 
         // Then

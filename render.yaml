@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: tienda-gamer-gateway
+    runtime: docker
+    rootDir: api-gateway
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8090
+# Cada microservicio se crea como Web Service Docker usando su carpeta como rootDir.
+# Las URL *_SERVICE_URL del Gateway deben apuntar a las URLs internas de Render.

@@ -34,6 +34,31 @@ spring:
               uri: ${PAGO_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/pagos/**
+            - id: categoria-service
+              uri: ${CATEGORIA_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/categorias/**
+            - id: proveedor-service
+              uri: ${PROVEEDOR_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/proveedores/**
+            - id: carrito-service
+              uri: ${CARRITO_SERVICE_URL:http://localhost:8087}
+              predicates:
+                - Path=/carritos/**
+            - id: resena-service
+              uri: ${RESENA_SERVICE_URL:http://localhost:8088}
+              predicates:
+                - Path=/resenas/**
+            - id: notificacion-service
+              uri: ${NOTIFICACION_SERVICE_URL:http://localhost:8089}
+              predicates:
+                - Path=/notificaciones/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 
 management:
   endpoints:

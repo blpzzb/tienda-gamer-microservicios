@@ -1,7 +1,9 @@
 package cl.duoc.tienda.inventario.controller;
 
+import cl.duoc.tienda.inventario.dto.InventarioRequest;
 import cl.duoc.tienda.inventario.model.Inventario;
 import cl.duoc.tienda.inventario.service.InventarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +35,14 @@ public class InventarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Inventario> create(@RequestBody Inventario inventario) {
-        Inventario nuevo = inventarioService.guardar(inventario);
+    public ResponseEntity<Inventario> create(@Valid @RequestBody InventarioRequest request) {
+        Inventario nuevo = inventarioService.guardar(request);
         return ResponseEntity.status(201).body(nuevo);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Inventario> update(@PathVariable Long id, @Valid @RequestBody InventarioRequest request) {
+        return ResponseEntity.ok(inventarioService.actualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
