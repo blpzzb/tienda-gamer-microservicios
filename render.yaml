@@ -1,11 +1,211 @@
+# Blueprint de Render para la demostracion EFT.
+# Todos los servicios son publicos por compatibilidad con el plan Free de Render:
+# ese plan puede enviar trafico privado, pero no recibirlo. El Gateway es la unica
+# URL que se debe presentar al docente.
 services:
+  - type: web
+    name: tienda-gamer-eureka
+    runtime: docker
+    plan: free
+    rootDir: eureka-server
+    healthCheckPath: /actuator/health
+
+  - type: web
+    name: tienda-gamer-usuarios
+    runtime: docker
+    plan: free
+    rootDir: usuario-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-productos
+    runtime: docker
+    plan: free
+    rootDir: tienda-gamer-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-inventario
+    runtime: docker
+    plan: free
+    rootDir: inventario-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-ordenes
+    runtime: docker
+    plan: free
+    rootDir: orden-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+      - key: USUARIO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-usuarios
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: TIENDA_SERVICE_URL
+        fromService:
+          name: tienda-gamer-productos
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: INVENTARIO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-inventario
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: tienda-gamer-pagos
+    runtime: docker
+    plan: free
+    rootDir: pago-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+      - key: ORDEN_SERVICE_URL
+        fromService:
+          name: tienda-gamer-ordenes
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: tienda-gamer-categorias
+    runtime: docker
+    plan: free
+    rootDir: categoria-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-proveedores
+    runtime: docker
+    plan: free
+    rootDir: proveedor-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-carritos
+    runtime: docker
+    plan: free
+    rootDir: carrito-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-resenas
+    runtime: docker
+    plan: free
+    rootDir: resena-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
+  - type: web
+    name: tienda-gamer-notificaciones
+    runtime: docker
+    plan: free
+    rootDir: notificacion-service
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: EUREKA_URL
+        sync: false
+
   - type: web
     name: tienda-gamer-gateway
     runtime: docker
+    plan: free
     rootDir: api-gateway
     healthCheckPath: /actuator/health
     envVars:
-      - key: PORT
-        value: 8090
-# Cada microservicio se crea como Web Service Docker usando su carpeta como rootDir.
-# Las URL *_SERVICE_URL del Gateway deben apuntar a las URLs internas de Render.
+      - key: EUREKA_URL
+        sync: false
+      - key: USUARIO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-usuarios
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: TIENDA_SERVICE_URL
+        fromService:
+          name: tienda-gamer-productos
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: INVENTARIO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-inventario
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: ORDEN_SERVICE_URL
+        fromService:
+          name: tienda-gamer-ordenes
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: PAGO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-pagos
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CATEGORIA_SERVICE_URL
+        fromService:
+          name: tienda-gamer-categorias
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: PROVEEDOR_SERVICE_URL
+        fromService:
+          name: tienda-gamer-proveedores
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CARRITO_SERVICE_URL
+        fromService:
+          name: tienda-gamer-carritos
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: RESENA_SERVICE_URL
+        fromService:
+          name: tienda-gamer-resenas
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NOTIFICACION_SERVICE_URL
+        fromService:
+          name: tienda-gamer-notificaciones
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL

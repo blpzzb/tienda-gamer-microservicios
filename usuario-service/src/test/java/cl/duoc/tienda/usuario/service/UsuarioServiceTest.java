@@ -157,4 +157,46 @@ public class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).existsById(id);
         verify(usuarioRepository, never()).deleteById(id);
     }
+
+    @Test
+    void guardar_conNombreNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.guardar(new UsuarioRequest(null, "correo@duoc.cl", "12345678-9")));
+
+        assertEquals("El nombre del usuario es obligatorio", exception.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void guardar_conCorreoVacio_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.guardar(new UsuarioRequest("Javier", " ", "12345678-9")));
+
+        assertEquals("El correo del usuario es obligatorio", exception.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void actualizar_deberiaComprobarExistenciaYConservarElId() {
+        Usuario existente = new Usuario();
+        existente.setId(4L);
+        when(usuarioRepository.findById(4L)).thenReturn(Optional.of(existente));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Usuario resultado = usuarioService.actualizar(4L,
+                new UsuarioRequest("Javiera", "javiera@duoc.cl", "11111111-1"));
+
+        assertEquals(4L, resultado.getId());
+        assertEquals("Javiera", resultado.getNombre());
+        verify(usuarioRepository).findById(4L);
+    }
+
+    @Test
+    void eliminar_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.eliminar(null));
+
+        assertEquals("El ID del usuario es obligatorio", exception.getMessage());
+        verify(usuarioRepository, never()).existsById(any());
+    }
 }

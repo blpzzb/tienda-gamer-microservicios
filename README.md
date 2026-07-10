@@ -19,7 +19,7 @@ La solución contiene 10 microservicios de negocio, además de API Gateway y Eur
 
 Gateway: `http://localhost:8090`. Eureka: `http://localhost:8761`. Swagger está disponible en cada servicio mediante `/swagger-ui.html`.
 
-Ejecución recomendada: `docker compose up --build`. La preparación de la demostración está en [GUIA_DEFENSA_EFT.md](docs/GUIA_DEFENSA_EFT.md).
+Ejecución recomendada: `docker compose up --build`. La preparación de la demostración está en [GUIA_DEFENSA_EFT.md](docs/GUIA_DEFENSA_EFT.md) y el despliegue remoto en [RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md).
 
 ## Descripción del proyecto
 

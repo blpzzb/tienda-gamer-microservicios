@@ -237,4 +237,32 @@ public class PagoServiceTest {
         verify(pagoRepository, never()).existsById(any());
         verify(pagoRepository, never()).deleteById(any());
     }
+
+    @Test
+    void buscarPorId_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pagoService.buscarPorId(null));
+
+        assertEquals("El ID del pago es obligatorio", exception.getMessage());
+        verify(pagoRepository, never()).findById(any());
+    }
+
+    @Test
+    void actualizar_conPagoValido_deberiaValidarOrdenYConservarElId() {
+        ReflectionTestUtils.setField(pagoService, "ordenServiceUrl", "http://localhost:8082");
+        Pago existente = new Pago();
+        existente.setId(6L);
+        when(pagoRepository.findById(6L)).thenReturn(Optional.of(existente));
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        OrdenDTO orden = new OrdenDTO(); orden.setId(3L);
+        when(responseSpec.bodyToMono(OrdenDTO.class)).thenReturn(Mono.just(orden));
+        when(pagoRepository.save(any(Pago.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Pago resultado = pagoService.actualizar(6L, new PagoRequest(3L, 45000.0));
+
+        assertEquals(6L, resultado.getId());
+        assertEquals("PAGADO", resultado.getEstado());
+        verify(pagoRepository).save(any(Pago.class));
+    }
 }

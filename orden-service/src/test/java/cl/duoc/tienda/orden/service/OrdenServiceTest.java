@@ -310,4 +310,38 @@ public class OrdenServiceTest {
         verify(ordenRepository, never()).existsById(any());
         verify(ordenRepository, never()).deleteById(any());
     }
+
+    @Test
+    void buscarPorId_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> ordenService.buscarPorId(null));
+
+        assertEquals("El ID de la orden es obligatorio", exception.getMessage());
+        verify(ordenRepository, never()).findById(any());
+    }
+
+    @Test
+    void actualizar_conOrdenValida_deberiaValidarServiciosYConservarElId() {
+        ReflectionTestUtils.setField(ordenService, "usuarioServiceUrl", "http://localhost:8081");
+        ReflectionTestUtils.setField(ordenService, "productoServiceUrl", "http://localhost:8080");
+        ReflectionTestUtils.setField(ordenService, "inventarioServiceUrl", "http://localhost:8083");
+        Orden existente = new Orden();
+        existente.setId(7L);
+        when(ordenRepository.findById(7L)).thenReturn(Optional.of(existente));
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        UsuarioDTO usuario = new UsuarioDTO(); usuario.setNombre("Javier");
+        ProductoDTO producto = new ProductoDTO(); producto.setNombre("Mouse");
+        InventarioDTO inventario = new InventarioDTO(); inventario.setStockActual(10);
+        when(responseSpec.bodyToMono(UsuarioDTO.class)).thenReturn(Mono.just(usuario));
+        when(responseSpec.bodyToMono(ProductoDTO.class)).thenReturn(Mono.just(producto));
+        when(responseSpec.bodyToMono(InventarioDTO.class)).thenReturn(Mono.just(inventario));
+        when(ordenRepository.save(any(Orden.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Orden resultado = ordenService.actualizar(7L, new OrdenRequest(2L, 3L, 2));
+
+        assertEquals(7L, resultado.getId());
+        assertEquals(2L, resultado.getUsuarioId());
+        verify(ordenRepository).save(any(Orden.class));
+    }
 }

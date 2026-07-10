@@ -210,4 +210,28 @@ public class ProductoServiceTest {
         verify(productoRepository, times(1)).existsById(id);
         verify(productoRepository, never()).deleteById(id);
     }
+
+    @Test
+    void actualizar_deberiaComprobarExistenciaYConservarElId() {
+        Producto existente = new Producto();
+        existente.setId(5L);
+        when(productoRepository.findById(5L)).thenReturn(Optional.of(existente));
+        when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Producto resultado = productoService.actualizar(5L,
+                new ProductoRequest("Teclado", "Perifericos", 35000.0, 8));
+
+        assertEquals(5L, resultado.getId());
+        assertEquals("Teclado", resultado.getNombre());
+        verify(productoRepository).findById(5L);
+    }
+
+    @Test
+    void eliminar_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productoService.eliminar(null));
+
+        assertEquals("El ID del producto es obligatorio", exception.getMessage());
+        verify(productoRepository, never()).existsById(any());
+    }
 }
