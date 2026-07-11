@@ -1,23 +1,31 @@
 # Blueprint de Render para la demostracion EFT.
-# Todos los servicios son publicos por compatibilidad con el plan Free de Render:
-# ese plan puede enviar trafico privado, pero no recibirlo. El Gateway es la unica
-# URL que se debe presentar al docente.
+# Los Dockerfiles compilan el proyecto Maven raiz, por eso cada servicio usa el
+# repositorio completo como contexto y su Dockerfile particular.
+# Los servicios de negocio se exponen como web para que puedan comunicarse por
+# URL publica cuando se use el plan Free. El Gateway es la unica URL que se debe
+# presentar al docente.
 services:
   - type: web
     name: tienda-gamer-eureka
     runtime: docker
     plan: free
-    rootDir: eureka-server
+    dockerfilePath: eureka-server/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
 
   - type: web
     name: tienda-gamer-usuarios
     runtime: docker
     plan: free
-    rootDir: usuario-service
+    dockerfilePath: usuario-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -26,10 +34,15 @@ services:
     name: tienda-gamer-productos
     runtime: docker
     plan: free
-    rootDir: tienda-gamer-service
+    dockerfilePath: tienda-gamer-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -38,10 +51,15 @@ services:
     name: tienda-gamer-inventario
     runtime: docker
     plan: free
-    rootDir: inventario-service
+    dockerfilePath: inventario-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -50,10 +68,15 @@ services:
     name: tienda-gamer-ordenes
     runtime: docker
     plan: free
-    rootDir: orden-service
+    dockerfilePath: orden-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -77,10 +100,15 @@ services:
     name: tienda-gamer-pagos
     runtime: docker
     plan: free
-    rootDir: pago-service
+    dockerfilePath: pago-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -94,10 +122,15 @@ services:
     name: tienda-gamer-categorias
     runtime: docker
     plan: free
-    rootDir: categoria-service
+    dockerfilePath: categoria-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -106,10 +139,15 @@ services:
     name: tienda-gamer-proveedores
     runtime: docker
     plan: free
-    rootDir: proveedor-service
+    dockerfilePath: proveedor-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -118,10 +156,15 @@ services:
     name: tienda-gamer-carritos
     runtime: docker
     plan: free
-    rootDir: carrito-service
+    dockerfilePath: carrito-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -130,10 +173,15 @@ services:
     name: tienda-gamer-resenas
     runtime: docker
     plan: free
-    rootDir: resena-service
+    dockerfilePath: resena-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -142,10 +190,15 @@ services:
     name: tienda-gamer-notificaciones
     runtime: docker
     plan: free
-    rootDir: notificacion-service
+    dockerfilePath: notificacion-service/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
         sync: false
       - key: EUREKA_URL
         sync: false
@@ -154,7 +207,8 @@ services:
     name: tienda-gamer-gateway
     runtime: docker
     plan: free
-    rootDir: api-gateway
+    dockerfilePath: api-gateway/Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: EUREKA_URL

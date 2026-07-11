@@ -658,7 +658,7 @@ Desarrollo FullStack 1
 Evaluación:
 
 ```text
-Evaluación Parcial 3
+Examen Final Transversal (EFT)
 ```
 
 Integrantes:
@@ -668,3 +668,6 @@ Integrantes:
 - Integrante 2
 - Integrante 3
 - Integrante 4
+```
+
+> Antes de la entrega, reemplazar los nombres genéricos de integrantes por los nombres reales del equipo. La pauta exige que el repositorio identifique a cada integrante.

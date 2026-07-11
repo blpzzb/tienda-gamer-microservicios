@@ -28,7 +28,7 @@ La instancia debe permitir crear o contener estos esquemas:
 1. Subir este cambio al repositorio de GitHub y, en Render, crear un Blueprint desde ese repositorio.
 2. Esperar que Render cree `tienda-gamer-eureka`. Abrir su URL pública y comprobar `GET /actuator/health`.
 3. En las variables de cada servicio de negocio, definir `EUREKA_URL` con la URL de Eureka terminada en `/eureka/`. Ejemplo: `https://tienda-gamer-eureka.onrender.com/eureka/`.
-4. Definir `DB_URL` para cada servicio con la cadena JDBC del esquema correspondiente. Ejemplo de usuarios: `jdbc:mysql://HOST:3306/db_usuarios?serverTimezone=UTC&useSSL=true`.
+4. Definir `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` para cada servicio con la cadena JDBC y las credenciales del esquema correspondiente. Ejemplo de usuarios: `DB_URL=jdbc:mysql://HOST:3306/db_usuarios?serverTimezone=UTC&useSSL=true`.
 5. Ejecutar un nuevo despliegue. En la consola de Eureka deben aparecer los diez servicios registrados por nombre lógico.
 6. Abrir la URL de `tienda-gamer-gateway` y comprobar `GET /actuator/health`.
 7. Desde Postman, probar una ruta solo mediante Gateway, por ejemplo `GET https://URL-DEL-GATEWAY/productos` y luego `GET https://URL-DEL-GATEWAY/categorias`.
