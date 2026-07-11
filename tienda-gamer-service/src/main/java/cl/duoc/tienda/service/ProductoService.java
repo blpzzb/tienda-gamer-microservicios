@@ -1,5 +1,6 @@
 package cl.duoc.tienda.service;
 
+import cl.duoc.tienda.dto.ProductoRequest;
 import cl.duoc.tienda.model.Producto;
 import cl.duoc.tienda.repository.ProductoRepository;
 import org.slf4j.Logger;
@@ -32,28 +33,50 @@ public class ProductoService {
                 });
     }
 
-    public Producto guardar(Producto producto) {
-        logger.info("Intentando guardar producto: {}", producto.getNombre());
+    public Producto guardar(ProductoRequest request) {
+        logger.info("Intentando guardar producto: {}", request.nombre());
 
-        if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
+        if (request.nombre() == null || request.nombre().trim().isEmpty()) {
             logger.warn("No se pudo guardar el producto: nombre vacío");
             throw new IllegalArgumentException("El nombre del producto es obligatorio");
         }
 
-        if (producto.getPrecio() == null || producto.getPrecio() <= 0) {
+        if (request.precio() == null || request.precio() <= 0) {
             logger.warn("No se pudo guardar el producto: precio inválido");
             throw new IllegalArgumentException("El precio debe ser mayor a 0");
         }
 
-        if (producto.getStock() == null || producto.getStock() < 0) {
+        if (request.stock() == null || request.stock() < 0) {
             logger.warn("No se pudo guardar el producto: stock inválido");
             throw new IllegalArgumentException("El stock no puede ser negativo");
         }
+
+        Producto producto = new Producto();
+        producto.setNombre(request.nombre());
+        producto.setCategoria(request.categoria());
+        producto.setPrecio(request.precio());
+        producto.setStock(request.stock());
 
         Producto productoGuardado = productoRepository.save(producto);
 
         logger.info("Producto guardado correctamente con ID: {}", productoGuardado.getId());
 
+        return productoGuardado;
+    }
+
+    public Producto actualizar(Long id, ProductoRequest request) {
+        logger.info("Intentando actualizar producto con ID: {}", id);
+        buscarPorId(id);
+        
+        Producto producto = new Producto();
+        producto.setId(id);
+        producto.setNombre(request.nombre());
+        producto.setCategoria(request.categoria());
+        producto.setPrecio(request.precio());
+        producto.setStock(request.stock());
+
+        Producto productoGuardado = productoRepository.save(producto);
+        logger.info("Producto actualizado correctamente con ID: {}", id);
         return productoGuardado;
     }
 

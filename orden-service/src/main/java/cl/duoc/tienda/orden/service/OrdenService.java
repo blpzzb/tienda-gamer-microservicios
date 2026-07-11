@@ -1,6 +1,7 @@
 package cl.duoc.tienda.orden.service;
 
 import cl.duoc.tienda.orden.dto.InventarioDTO;
+import cl.duoc.tienda.orden.dto.OrdenRequest;
 import cl.duoc.tienda.orden.dto.ProductoDTO;
 import cl.duoc.tienda.orden.dto.UsuarioDTO;
 import cl.duoc.tienda.orden.model.Orden;
@@ -58,30 +59,65 @@ public class OrdenService {
                 });
     }
 
-    public Orden guardar(Orden orden) {
+    public Orden guardar(OrdenRequest request) {
         logger.info("Iniciando creación de orden");
 
-        validarOrden(orden);
+        validarOrden(request);
 
-        UsuarioDTO usuario = consultarUsuario(orden.getUsuarioId());
-        ProductoDTO producto = consultarProducto(orden.getProductoId());
-        InventarioDTO inventario = consultarInventario(orden.getProductoId());
+        UsuarioDTO usuario = consultarUsuario(request.usuarioId());
+        ProductoDTO producto = consultarProducto(request.productoId());
+        InventarioDTO inventario = consultarInventario(request.productoId());
 
         logger.info("Usuario validado desde usuario-service: {}", usuario.getNombre());
         logger.info("Producto validado desde tienda-gamer-service: {}", producto.getNombre());
         logger.info("Stock consultado desde inventario-service: {}", inventario.getStockActual());
 
-        if (inventario.getStockActual() == null || inventario.getStockActual() < orden.getCantidad()) {
-            logger.warn("Stock insuficiente para producto ID: {}", orden.getProductoId());
+        if (inventario.getStockActual() == null || inventario.getStockActual() < request.cantidad()) {
+            logger.warn("Stock insuficiente para producto ID: {}", request.productoId());
             throw new RuntimeException("Stock insuficiente para crear la orden");
         }
 
+        Orden orden = new Orden();
+        orden.setUsuarioId(request.usuarioId());
+        orden.setProductoId(request.productoId());
+        orden.setCantidad(request.cantidad());
         orden.setFechaOrden(LocalDateTime.now());
 
         Orden ordenGuardada = ordenRepository.save(orden);
 
         logger.info("Orden creada correctamente con ID: {}", ordenGuardada.getId());
 
+        return ordenGuardada;
+    }
+
+    public Orden actualizar(Long id, OrdenRequest request) {
+        logger.info("Intentando actualizar orden con ID: {}", id);
+        buscarPorId(id);
+        
+        validarOrden(request);
+
+        UsuarioDTO usuario = consultarUsuario(request.usuarioId());
+        ProductoDTO producto = consultarProducto(request.productoId());
+        InventarioDTO inventario = consultarInventario(request.productoId());
+
+        logger.info("Usuario validado desde usuario-service: {}", usuario.getNombre());
+        logger.info("Producto validado desde tienda-gamer-service: {}", producto.getNombre());
+        logger.info("Stock consultado desde inventario-service: {}", inventario.getStockActual());
+
+        if (inventario.getStockActual() == null || inventario.getStockActual() < request.cantidad()) {
+            logger.warn("Stock insuficiente para producto ID: {}", request.productoId());
+            throw new RuntimeException("Stock insuficiente para crear la orden");
+        }
+
+        Orden orden = new Orden();
+        orden.setId(id);
+        orden.setUsuarioId(request.usuarioId());
+        orden.setProductoId(request.productoId());
+        orden.setCantidad(request.cantidad());
+        orden.setFechaOrden(LocalDateTime.now());
+
+        Orden ordenGuardada = ordenRepository.save(orden);
+        logger.info("Orden actualizada correctamente con ID: {}", id);
         return ordenGuardada;
     }
 
@@ -103,18 +139,18 @@ public class OrdenService {
         logger.info("Orden eliminada correctamente con ID: {}", id);
     }
 
-    private void validarOrden(Orden orden) {
-        if (orden.getUsuarioId() == null) {
+    private void validarOrden(OrdenRequest request) {
+        if (request.usuarioId() == null) {
             logger.warn("No se pudo crear la orden: usuarioId vacío");
             throw new IllegalArgumentException("El usuarioId es obligatorio");
         }
 
-        if (orden.getProductoId() == null) {
+        if (request.productoId() == null) {
             logger.warn("No se pudo crear la orden: productoId vacío");
             throw new IllegalArgumentException("El productoId es obligatorio");
         }
 
-        if (orden.getCantidad() == null || orden.getCantidad() <= 0) {
+        if (request.cantidad() == null || request.cantidad() <= 0) {
             logger.warn("No se pudo crear la orden: cantidad inválida");
             throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
         }

@@ -1,6 +1,7 @@
 package cl.duoc.tienda.pago.service;
 
 import cl.duoc.tienda.pago.dto.OrdenDTO;
+import cl.duoc.tienda.pago.dto.PagoRequest;
 import cl.duoc.tienda.pago.model.Pago;
 import cl.duoc.tienda.pago.repository.PagoRepository;
 import org.junit.jupiter.api.Test;
@@ -119,10 +120,7 @@ public class PagoServiceTest {
         // Given
         ReflectionTestUtils.setField(pagoService, "ordenServiceUrl", "http://localhost:8082");
 
-        Pago pago = new Pago();
-        pago.setOrdenId(1L);
-        pago.setMonto(50000.0);
-        pago.setEstado("PAGADO");
+        PagoRequest request = new PagoRequest(1L, 50000.0);
 
         OrdenDTO ordenDTO = new OrdenDTO();
         ordenDTO.setId(1L);
@@ -141,10 +139,10 @@ public class PagoServiceTest {
         when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(OrdenDTO.class)).thenReturn(Mono.just(ordenDTO));
-        when(pagoRepository.save(pago)).thenReturn(pagoGuardado);
+        when(pagoRepository.save(any(Pago.class))).thenReturn(pagoGuardado);
 
         // When
-        Pago resultado = pagoService.guardar(pago);
+        Pago resultado = pagoService.guardar(request);
 
         // Then
         assertNotNull(resultado);
@@ -153,59 +151,17 @@ public class PagoServiceTest {
         assertEquals(50000.0, resultado.getMonto());
         assertEquals("PAGADO", resultado.getEstado());
 
-        verify(pagoRepository, times(1)).save(pago);
-    }
-
-    @Test
-    void guardar_conEstadoVacio_deberiaAsignarEstadoPagado() {
-        // Given
-        ReflectionTestUtils.setField(pagoService, "ordenServiceUrl", "http://localhost:8082");
-
-        Pago pago = new Pago();
-        pago.setOrdenId(1L);
-        pago.setMonto(50000.0);
-        pago.setEstado("");
-
-        OrdenDTO ordenDTO = new OrdenDTO();
-        ordenDTO.setId(1L);
-        ordenDTO.setUsuarioId(1L);
-        ordenDTO.setProductoId(1L);
-        ordenDTO.setCantidad(2);
-
-        Pago pagoGuardado = new Pago();
-        pagoGuardado.setId(1L);
-        pagoGuardado.setOrdenId(1L);
-        pagoGuardado.setMonto(50000.0);
-        pagoGuardado.setEstado("PAGADO");
-
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(OrdenDTO.class)).thenReturn(Mono.just(ordenDTO));
-        when(pagoRepository.save(pago)).thenReturn(pagoGuardado);
-
-        // When
-        Pago resultado = pagoService.guardar(pago);
-
-        // Then
-        assertNotNull(resultado);
-        assertEquals("PAGADO", pago.getEstado());
-        assertEquals("PAGADO", resultado.getEstado());
-
-        verify(pagoRepository, times(1)).save(pago);
+        verify(pagoRepository, times(1)).save(any(Pago.class));
     }
 
     @Test
     void guardar_conOrdenIdNulo_deberiaLanzarExcepcion() {
         // Given
-        Pago pago = new Pago();
-        pago.setOrdenId(null);
-        pago.setMonto(50000.0);
-        pago.setEstado("PAGADO");
+        PagoRequest request = new PagoRequest(null, 50000.0);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            pagoService.guardar(pago);
+            pagoService.guardar(request);
         });
 
         // Then
@@ -217,14 +173,11 @@ public class PagoServiceTest {
     @Test
     void guardar_conMontoInvalido_deberiaLanzarExcepcion() {
         // Given
-        Pago pago = new Pago();
-        pago.setOrdenId(1L);
-        pago.setMonto(0.0);
-        pago.setEstado("PAGADO");
+        PagoRequest request = new PagoRequest(1L, 0.0);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            pagoService.guardar(pago);
+            pagoService.guardar(request);
         });
 
         // Then
@@ -283,5 +236,33 @@ public class PagoServiceTest {
 
         verify(pagoRepository, never()).existsById(any());
         verify(pagoRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void buscarPorId_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pagoService.buscarPorId(null));
+
+        assertEquals("El ID del pago es obligatorio", exception.getMessage());
+        verify(pagoRepository, never()).findById(any());
+    }
+
+    @Test
+    void actualizar_conPagoValido_deberiaValidarOrdenYConservarElId() {
+        ReflectionTestUtils.setField(pagoService, "ordenServiceUrl", "http://localhost:8082");
+        Pago existente = new Pago();
+        existente.setId(6L);
+        when(pagoRepository.findById(6L)).thenReturn(Optional.of(existente));
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        OrdenDTO orden = new OrdenDTO(); orden.setId(3L);
+        when(responseSpec.bodyToMono(OrdenDTO.class)).thenReturn(Mono.just(orden));
+        when(pagoRepository.save(any(Pago.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Pago resultado = pagoService.actualizar(6L, new PagoRequest(3L, 45000.0));
+
+        assertEquals(6L, resultado.getId());
+        assertEquals("PAGADO", resultado.getEstado());
+        verify(pagoRepository).save(any(Pago.class));
     }
 }

@@ -1,5 +1,26 @@
 # Proyecto FullStack Prueba 3 - Tienda Gamer
 
+## Actualización para Evaluación Final Transversal
+
+La solución contiene 10 microservicios de negocio, además de API Gateway y Eureka Server.
+
+| Servicio | Puerto | Ruta Gateway |
+|---|---:|---|
+| Productos | 8080 | `/productos/**` |
+| Usuarios | 8081 | `/usuarios/**` |
+| Órdenes | 8082 | `/ordenes/**` |
+| Inventario | 8083 | `/inventario/**` |
+| Pagos | 8084 | `/pagos/**` |
+| Categorías | 8085 | `/categorias/**` |
+| Proveedores | 8086 | `/proveedores/**` |
+| Carritos | 8087 | `/carritos/**` |
+| Reseñas | 8088 | `/resenas/**` |
+| Notificaciones | 8089 | `/notificaciones/**` |
+
+Gateway: `http://localhost:8090`. Eureka: `http://localhost:8761`. Swagger está disponible en cada servicio mediante `/swagger-ui.html`.
+
+Ejecución recomendada: `docker compose up --build`. La preparación de la demostración está en [GUIA_DEFENSA_EFT.md](docs/GUIA_DEFENSA_EFT.md) y el despliegue remoto en [RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md).
+
 ## Descripción del proyecto
 
 Este proyecto corresponde a una arquitectura de microservicios desarrollada con **Spring Boot**, orientada a la gestión de una tienda gamer.
@@ -637,7 +658,7 @@ Desarrollo FullStack 1
 Evaluación:
 
 ```text
-Evaluación Parcial 3
+Examen Final Transversal (EFT)
 ```
 
 Integrantes:
@@ -647,3 +668,6 @@ Integrantes:
 - Integrante 2
 - Integrante 3
 - Integrante 4
+```
+
+> Antes de la entrega, reemplazar los nombres genéricos de integrantes por los nombres reales del equipo. La pauta exige que el repositorio identifique a cada integrante.

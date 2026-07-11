@@ -10,3 +10,10 @@ target/
 
 .DS_Store
 Thumbs.db
+
+.agents/
+.codex/
+docs/
+!docs/
+!docs/RENDER_DEPLOYMENT.md
+tmp/

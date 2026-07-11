@@ -1,0 +1,3 @@
+package cl.duoc.tienda.notificacion.model;
+import jakarta.persistence.*;
+@Entity @Table(name="notificaciones") public class Notificacion { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id; private Long usuarioId; private String mensaje; private Boolean leida; public Notificacion(){} public Notificacion(Long usuarioId, String mensaje, Boolean leida){this.usuarioId=usuarioId; this.mensaje=mensaje; this.leida=leida;} public Long getId(){return id;} public void setId(Long v){id=v;} public Long getUsuarioId(){return usuarioId;} public void setUsuarioId(Long v){usuarioId=v;} public String getMensaje(){return mensaje;} public void setMensaje(String v){mensaje=v;} public Boolean getLeida(){return leida;} public void setLeida(Boolean v){leida=v;} }

@@ -1,5 +1,6 @@
 package cl.duoc.tienda.inventario.service;
 
+import cl.duoc.tienda.inventario.dto.InventarioRequest;
 import cl.duoc.tienda.inventario.model.Inventario;
 import cl.duoc.tienda.inventario.repository.InventarioRepository;
 import org.slf4j.Logger;
@@ -47,28 +48,48 @@ public class InventarioService {
                 });
     }
 
-    public Inventario guardar(Inventario inventario) {
-        logger.info("Intentando guardar inventario para producto ID: {}", inventario.getProductoId());
+    public Inventario guardar(InventarioRequest request) {
+        logger.info("Intentando guardar inventario para producto ID: {}", request.productoId());
 
-        if (inventario.getProductoId() == null) {
+        if (request.productoId() == null) {
             logger.warn("No se pudo guardar inventario: productoId vacío");
             throw new IllegalArgumentException("El productoId es obligatorio");
         }
 
-        if (inventario.getStockActual() == null || inventario.getStockActual() < 0) {
+        if (request.stockActual() == null || request.stockActual() < 0) {
             logger.warn("No se pudo guardar inventario: stock inválido");
             throw new IllegalArgumentException("El stock actual no puede ser negativo");
         }
 
-        if (inventario.getUbicacionBodega() == null || inventario.getUbicacionBodega().trim().isEmpty()) {
+        if (request.ubicacionBodega() == null || request.ubicacionBodega().trim().isEmpty()) {
             logger.warn("No se pudo guardar inventario: ubicación de bodega vacía");
             throw new IllegalArgumentException("La ubicación de bodega es obligatoria");
         }
+
+        Inventario inventario = new Inventario();
+        inventario.setProductoId(request.productoId());
+        inventario.setStockActual(request.stockActual());
+        inventario.setUbicacionBodega(request.ubicacionBodega());
 
         Inventario inventarioGuardado = inventarioRepository.save(inventario);
 
         logger.info("Inventario guardado correctamente con ID: {}", inventarioGuardado.getId());
 
+        return inventarioGuardado;
+    }
+
+    public Inventario actualizar(Long id, InventarioRequest request) {
+        logger.info("Intentando actualizar inventario con ID: {}", id);
+        buscarPorId(id);
+        
+        Inventario inventario = new Inventario();
+        inventario.setId(id);
+        inventario.setProductoId(request.productoId());
+        inventario.setStockActual(request.stockActual());
+        inventario.setUbicacionBodega(request.ubicacionBodega());
+
+        Inventario inventarioGuardado = inventarioRepository.save(inventario);
+        logger.info("Inventario actualizado correctamente con ID: {}", id);
         return inventarioGuardado;
     }
 

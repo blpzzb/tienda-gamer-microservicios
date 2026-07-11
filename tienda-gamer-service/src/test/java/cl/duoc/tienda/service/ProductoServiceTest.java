@@ -1,5 +1,6 @@
 package cl.duoc.tienda.service;
 
+import cl.duoc.tienda.dto.ProductoRequest;
 import cl.duoc.tienda.model.Producto;
 import cl.duoc.tienda.repository.ProductoRepository;
 import org.junit.jupiter.api.Test;
@@ -103,11 +104,7 @@ public class ProductoServiceTest {
     @Test
     void guardar_conProductoValido_deberiaGuardarProductoCorrectamente() {
         // Given
-        Producto producto = new Producto();
-        producto.setNombre("Mouse Gamer");
-        producto.setCategoria("Perifericos");
-        producto.setPrecio(25000.0);
-        producto.setStock(10);
+        ProductoRequest request = new ProductoRequest("Mouse Gamer", "Perifericos", 25000.0, 10);
 
         Producto productoGuardado = new Producto();
         productoGuardado.setId(1L);
@@ -116,10 +113,10 @@ public class ProductoServiceTest {
         productoGuardado.setPrecio(25000.0);
         productoGuardado.setStock(10);
 
-        when(productoRepository.save(producto)).thenReturn(productoGuardado);
+        when(productoRepository.save(any(Producto.class))).thenReturn(productoGuardado);
 
         // When
-        Producto resultado = productoService.guardar(producto);
+        Producto resultado = productoService.guardar(request);
 
         // Then
         assertNotNull(resultado);
@@ -128,21 +125,17 @@ public class ProductoServiceTest {
         assertEquals(25000.0, resultado.getPrecio());
         assertEquals(10, resultado.getStock());
 
-        verify(productoRepository, times(1)).save(producto);
+        verify(productoRepository, times(1)).save(any(Producto.class));
     }
 
     @Test
     void guardar_conNombreVacio_deberiaLanzarExcepcion() {
         // Given
-        Producto producto = new Producto();
-        producto.setNombre("");
-        producto.setCategoria("Perifericos");
-        producto.setPrecio(25000.0);
-        producto.setStock(10);
+        ProductoRequest request = new ProductoRequest("", "Perifericos", 25000.0, 10);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            productoService.guardar(producto);
+            productoService.guardar(request);
         });
 
         // Then
@@ -154,15 +147,11 @@ public class ProductoServiceTest {
     @Test
     void guardar_conPrecioInvalido_deberiaLanzarExcepcion() {
         // Given
-        Producto producto = new Producto();
-        producto.setNombre("Mouse Gamer");
-        producto.setCategoria("Perifericos");
-        producto.setPrecio(0.0);
-        producto.setStock(10);
+        ProductoRequest request = new ProductoRequest("Mouse Gamer", "Perifericos", 0.0, 10);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            productoService.guardar(producto);
+            productoService.guardar(request);
         });
 
         // Then
@@ -174,15 +163,11 @@ public class ProductoServiceTest {
     @Test
     void guardar_conStockNegativo_deberiaLanzarExcepcion() {
         // Given
-        Producto producto = new Producto();
-        producto.setNombre("Mouse Gamer");
-        producto.setCategoria("Perifericos");
-        producto.setPrecio(25000.0);
-        producto.setStock(-1);
+        ProductoRequest request = new ProductoRequest("Mouse Gamer", "Perifericos", 25000.0, -1);
 
         // When
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            productoService.guardar(producto);
+            productoService.guardar(request);
         });
 
         // Then
@@ -224,5 +209,29 @@ public class ProductoServiceTest {
 
         verify(productoRepository, times(1)).existsById(id);
         verify(productoRepository, never()).deleteById(id);
+    }
+
+    @Test
+    void actualizar_deberiaComprobarExistenciaYConservarElId() {
+        Producto existente = new Producto();
+        existente.setId(5L);
+        when(productoRepository.findById(5L)).thenReturn(Optional.of(existente));
+        when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Producto resultado = productoService.actualizar(5L,
+                new ProductoRequest("Teclado", "Perifericos", 35000.0, 8));
+
+        assertEquals(5L, resultado.getId());
+        assertEquals("Teclado", resultado.getNombre());
+        verify(productoRepository).findById(5L);
+    }
+
+    @Test
+    void eliminar_conIdNulo_deberiaRechazarLaSolicitud() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productoService.eliminar(null));
+
+        assertEquals("El ID del producto es obligatorio", exception.getMessage());
+        verify(productoRepository, never()).existsById(any());
     }
 }
